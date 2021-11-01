@@ -11,10 +11,11 @@ import ForgotPasswordReset from "./ForgotPasswordReset/ForgotPasswordReset";
 import Password from "./ChangePassword/Password";
 import Side, { userType } from "./Sidebar/Side";
 // import { ModalComp } from './Sidebar/Mod';
-import HomeComponent from "./Sidebar/Home";
-import ProjectComponent from "./Sidebar/ProjectComp";
-import ProfileComponent from "./Sidebar/ProfileComp";
-import TeamComponent from "./Sidebar/teamComponent";
+import HomeComponent from './Sidebar/Home';
+import ProjectComponent from './Sidebar/ProjectComp';
+import ProfileComponent from './Sidebar/ProfileComp';
+import TeamComponent from './Sidebar/teamComponent';
+import Maintask from './Tasks/Maintask';
 
 export function ProtectedRoute(props: any) {
   const token = localStorage.getItem("token");
@@ -29,6 +30,22 @@ export function ProtectedRoute(props: any) {
     </Route>
   );
 }
+
+export function OpenRoute(props: any) {
+  const token = localStorage.getItem('token')
+  console.log(token, 'token')
+  if (token) {
+    console.log(token, 'protected')
+    return (
+      <Route><Redirect to="/home" /> </Route>
+    )
+  }
+  return (
+    <Route path={props.path} exact component={props.component}></Route>
+    // <Route><Redirect to="/login" /> </Route>
+  )
+}
+
 
 function App() {
   const preUser = { closedTasks: [], openedTasks: [] } as userType;
@@ -83,6 +100,11 @@ function App() {
             path="/password/resetpassword/:token"
             component={ForgotPasswordReset}
           />
+          <Route
+            exact
+            path="/maintask"
+            component={Maintask}
+          />
 
           <ProtectedRoute path="/home" exact component={HomeComponent} />
           <ProtectedRoute
@@ -116,7 +138,7 @@ function App() {
             component={ProfileComponent}
           ></ProtectedRoute>
           <ProtectedRoute
-            path="/:projectid/:teamname/:teamid"
+            path="/:projectid/:teamname/:teamid/:owner"
             component={TeamComponent}
           ></ProtectedRoute>
           <Route
@@ -124,18 +146,17 @@ function App() {
             exact
             component={HomeComponent}
           ></Route>
-
-          <Route path="/login" exact component={Form}></Route>
+          <OpenRoute path="/login" exact component={Form}></OpenRoute>
           <ProtectedRoute path="/success" exact component={LoginSuccess} />
           <Route
             path="/success/:userToken/"
             exact
             component={LoginSuccess}
           ></Route>
-          <Route path="/signup" exact component={SignUp}></Route>
-          <Route path="/verify" exact component={Verify}></Route>
-          <Route path="/signup" exact component={SignUp}></Route>
-          <Route exact path="/forgotpassword" component={ForgotPasswordEmail} />
+          <OpenRoute path="/signup" exact component={SignUp}></OpenRoute>
+          <OpenRoute path="/verify" exact component={Verify}></OpenRoute>
+          <OpenRoute path="/signup" exact component={SignUp}></OpenRoute>
+          <OpenRoute exact path="/forgotpassword" component={ForgotPasswordEmail} />
           {/* <ProtectedRoute path="/changepassword" exact component={Password} /> */}
           <Route path="/welcome/:userToken/" exact component={Side}></Route>
           {/* <ProtectedRoute path="/:files" component={Side} /> */}

@@ -14,6 +14,7 @@ export default function Profile() {
   const [failed, setFailed] = useState("");
   const [file, setFile] = useState("");
   const [update, setUpdate] = useState("");
+  const [message, setMessage] = useState("");
   const token = localStorage.getItem("token") as string;
   useEffect(() => {
     axios
@@ -64,10 +65,12 @@ export default function Profile() {
       .then((res: any) => {
         setUpdate(res.data.user);
         setFailed("Updated successfully");
+        setMessage("Profile Updated successfully")
         console.log(res.data);
       })
       .catch((err) => {
         setFailed(err);
+        setMessage(err)
         console.log(err);
       });
   };
@@ -88,6 +91,7 @@ export default function Profile() {
       .then((res: any) => {
         setLoading(false);
         setFailed("Updated successfully");
+        setMessage("Profile Updated successfully")
         console.log("Change PicFile says: ", res);
         setProfileImgUrl(res.data.user.profileImage);
       })
@@ -97,13 +101,12 @@ export default function Profile() {
       });
   };
   return (
-    
     <form onSubmit={submitHandler} className="profile-container">
       <div className="profile-imgwrap">
-        <img src={fine}></img>
+        <img className="profile-img" src={fine}></img>
       </div>
       <div className="small-container">
-        <div className= 'input-content'>
+        <div className="input-content">
           Name
           <input
             value={name}
@@ -112,7 +115,7 @@ export default function Profile() {
             className="profile-input"
           />
         </div>
-        <div className= 'input-content'>
+        <div className="input-content">
           Role
           <input
             value={role}
@@ -121,16 +124,21 @@ export default function Profile() {
             className="profile-input"
           />
         </div>
-        <div className= 'input-content'>
+        <div className="input-content">
           Gender
-          <input
+          <select onChange={(e) => setGender(e.target.value)} className="profile-input" name="" id="">
+            <option value={gender}>{gender}</option>
+            <option value="male">male</option>
+            <option value="female">female</option>
+          </select>
+          {/* <input
             value={gender}
             onChange={(e) => setGender(e.target.value)}
             type="text"
             className="profile-input"
-          />
+          /> */}
         </div>
-        <div className= 'input-content'>
+        <div className="input-content">
           Location
           <input
             value={location}
@@ -147,7 +155,7 @@ export default function Profile() {
             </div>
           </div>
         </div> */}
-        <div className= 'input-content'>
+        <div className="input-content">
           About
           <textarea
             value={about}
@@ -157,6 +165,7 @@ export default function Profile() {
             className="profile-about"
           />
         </div>
+        <p className="profile-meassage">{message}</p>
         <button
           onClick={submitHandler}
           className="profile-button"

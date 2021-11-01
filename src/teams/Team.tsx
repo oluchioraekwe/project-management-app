@@ -2,6 +2,7 @@ import TeamData from "./teamsData";
 import "./Team.css";
 import { useEffect, useState } from "react";
 import PersonalData from "./personalData";
+import { InviteModalComp, TeamMemberModalComp } from "../Sidebar/Mod";
 //import { getTeams } from "./teams/teamsMembers";
 
 function Team(props: any) {
@@ -73,11 +74,25 @@ function Team(props: any) {
       img={
         team.avatar
           ? team.avatar
-          : `https://res.cloudinary.com/demo/image/twitter/1330457336.jpg`
+          : `/Avatar.png`
       }
     />
   ));
   console.log("team roles", teams);
+
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [closeModal, setCloseModal] = useState(false);
+
+
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  function handleCloseModal() {
+    setIsOpen(false)
+  }
+  
   return (
     <div className="main">
       <div className="main-page">
@@ -86,12 +101,17 @@ function Team(props: any) {
             {teams.length > 1 ? "Members" : "Member"}
           </h1>
           <h1>{team.length}</h1>
+          <button onClick = {openModal} className="member-add-btn" >Add member</button>
         </div>
         <div className="members-container">{team}</div>
       </div>
       <div className="second-main-page">
-        <PersonalData member={memberDetails} />
+        {memberDetails.firstname ? <PersonalData member={memberDetails} /> : <p>Click on a member to see details</p>}
       </div>
+
+      {isOpen && (
+        <TeamMemberModalComp closeModal={handleCloseModal} collaborators = {props.collaborators} team = {props.team} />
+      )}
     </div>
   );
 }

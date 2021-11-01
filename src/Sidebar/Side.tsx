@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { Avatar, IconButton } from "@material-ui/core";
@@ -6,13 +6,14 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { Navbar, ProjectNavbar, ProfileNavbar } from "./navbar";
 import "./Side.css";
-import { ProjectModalComp, TeamModalComp } from "./Mod";
+import { InviteModalComp, ProjectModalComp, TeamModalComp } from "./Mod";
 import MainContent from "./mainContent";
 import { FilesPage } from "../filesPage/files";
 import Password from "../ChangePassword/Password";
 import axios from "axios";
 import TeamData from "../teams/teamsData";
 // import Profile from "./profile";
+import FineIcon from "../assets/designicon.svg";
 
 export interface ITask {
   [x: string]: any;
@@ -52,8 +53,9 @@ export interface iComment {
 }
 
 export interface userProject {
+  id?: string;
   projectId?: string;
-  projectName?: string;
+  projectName: string;
   owner: boolean;
 }
 
@@ -91,7 +93,7 @@ function Side(props: any) {
     localStorage.setItem("user", userFromToken);
   }
   loggedUser = JSON.parse(localStorage.getItem("user") as string);
-  const preUser = { closedTasks: [], openedTasks: [] } as userType;
+  const preUser = { projects: [], closedTasks: [], openedTasks: [] } as userType;
   const [profile, setProfile] = useState<userType>(preUser);
 
   useEffect(() => {
@@ -112,6 +114,10 @@ function Side(props: any) {
         console.log(err);
       });
   }, []);
+
+  const ownerProjects = profile.projects?.filter(project => project.owner)
+
+  console.log(ownerProjects, "Projects for invite")
 
   const [projects, setProjects] = useState<any[]>([]);
 
@@ -190,11 +196,13 @@ function Side(props: any) {
   }, [project]);
 
   useEffect(() => {
-    console.log("The id of a team: ", teamId);
+    console.log(teamId);
   }, [teamId]);
 
   const [projectModalIsOpen, setProjectIsOpen] = useState<boolean>(false);
   const [teamModalIsOpen, setTeamIsOpen] = useState<boolean>(false);
+  const [projectInviteIsOpen, setInviteIsOpen] = useState<boolean>(false)
+  const [activeId, setActiveId] = useState<null|string|undefined>(null)
 
   function openProjectModal() {
     setProjectIsOpen(true);
@@ -204,9 +212,14 @@ function Side(props: any) {
     setTeamIsOpen(true);
   }
 
+  function openInviteModal(){
+    setInviteIsOpen(true)
+  }
+
   function closeModal() {
     setProjectIsOpen(false);
     setTeamIsOpen(false);
+    setInviteIsOpen(false)
   }
 
   function openProject(e: any) {
@@ -217,7 +230,10 @@ function Side(props: any) {
     });
     window.location.href = "/welcome";
   }
-
+  const sidebar = document.querySelector(".sidebar");
+  function menuBtnChange() {
+    sidebar?.classList.toggle("open");
+  }
   return (
     <>
       <div className="sidebar_header">
@@ -233,6 +249,26 @@ function Side(props: any) {
                 <div className="dash"></div>
               </div>
             </div>
+            <div className="logo-details">
+              <i className="bx bxl-c-plus-plus icon">
+                {/* <div>
+                  <svg viewBox="0 0 100 80" width="40" height="40">
+                    <rect width="100" height="20" />
+                    <rect y="30" width="100" height="20" />
+                    <rect y="60" width="100" height="20" />
+                  </svg>
+                </div> */}
+              </i>
+            </div>
+
+            {/* <i className="bx-menu" onClick={menuBtnChange} id="btn">
+            <svg fill="#fff" viewBox="0 0 100 80" width="20"  height="20">
+            <rect width="100" height="20"></rect>x
+            <rect y="30" width="100" height="20"></rect>
+            <rect y="60" width="100" height="20"></rect>
+            </svg>
+            </i>
+           </div>  */}
             <div className="projectus">PROJECTUS</div>
             <IconButton>
               <SearchIcon style={{ fill: "#878787" }} />
@@ -283,10 +319,19 @@ function Side(props: any) {
             <div>
               <h4 className="menu">MENU</h4>
             </div>
-            <div onClick={(e) => (window.location.href = "/home")}> Home </div>
-            <div> My Tasks </div>
+            <div
+              className="div_home"
+              onClick={(e) => (window.location.href = "/home")}
+            >
+              {" "}
+              Home{" "}
+            </div>
+            <div className="div_home"> My Tasks </div>
             <div className="notifications">
               <div> Notfications </div>
+              {/* <p className="circle_yellow">
+            <span>3</span>
+            </p> */}
             </div>
           </div>
           <div className="Menu_projects">
@@ -296,7 +341,9 @@ function Side(props: any) {
             {profile.projects?.map((project) => (
               // <a href={project.projectName}>
               <div
+                key={project.id}
                 onClick={(e) => {
+                  setActiveId(project.projectId)
                   window.location.href = `/${project.projectName}/${project.projectId}/${project.owner}/task`;
                   setProject({
                     projectId: project.projectId as string,
@@ -306,8 +353,16 @@ function Side(props: any) {
                   setProfile(preUser);
                 }}
               >
-                {" "}
-                {project.projectName}
+                <div className={projectid === project?.projectId ? "projects_img_div activate": "projects_img_div"}>
+                  <span className="FineIcon">
+                    <img src={FineIcon} alt="ion" />
+                  </span>
+                  <p className="projects_items">
+                    {project.projectName.length > 20
+                      ? project.projectName.slice(0, 20) + " ..."
+                      : project.projectName}
+                  </p>
+                </div>
               </div>
               // </a>
             ))}
@@ -322,15 +377,16 @@ function Side(props: any) {
 
             {teams.map((team) => (
               <div
+                key={team._id}
                 onClick={(e) => {
-                  window.location.href = `/${projectid}/${team.teamName}/${team._id}`;
+                  window.location.href = `/${projectid}/${team.teamName}/${team._id}/${props.owner}`;
                   setTeamId(team._id);
                 }}
                 className="backend"
               >
                 {team.teamName}
                 {team.members.map((member) => (
-                  <IconButton>
+                  <IconButton key={member.userId}>
                     <Avatar
                       style={{ width: "25px", height: "25px" }}
                       src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHZx41E6X-WX4Q7rru7Ut0tRUHgdkJn-qTDg&usqp=CAU"
@@ -346,7 +402,7 @@ function Side(props: any) {
             </div>
           )}
           <div className="sidebar_footer">
-            <span>Invite your team</span> and start collaborating!
+            <span onClick = {openInviteModal}>Invite your team</span> and start collaborating!
           </div>
         </div>
       </div>
@@ -359,6 +415,10 @@ function Side(props: any) {
       )}
       {teamModalIsOpen && (
         <TeamModalComp setIsOpen={setTeamIsOpen} closeModal={closeModal} />
+      )}
+
+      {projectInviteIsOpen && (
+        <InviteModalComp closeModal={closeModal} projects={ownerProjects} />
       )}
     </>
   );
