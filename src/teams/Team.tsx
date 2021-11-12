@@ -34,7 +34,7 @@ function Team(props: any) {
       .then((res) => res.json())
       .then((data) => {
         if (data.msg || data.error) {
-          console.log("Major:", data);
+          //console.log("Major:", data);
         } else {
           setTeams(data.data);
         }
@@ -71,28 +71,22 @@ function Team(props: any) {
       lastname={team.lastname}
       role={team.role ? team.role : "No role"}
       tasksAssigned={team.closedTasks.length + team.openedTasks.length}
-      img={
-        team.avatar
-          ? team.avatar
-          : `/Avatar.png`
-      }
+      img={team.avatar ? team.avatar : `/Avatar.png`}
     />
   ));
   console.log("team roles", teams);
 
-
   const [isOpen, setIsOpen] = useState(false);
   const [closeModal, setCloseModal] = useState(false);
-
 
   function openModal() {
     setIsOpen(true);
   }
 
   function handleCloseModal() {
-    setIsOpen(false)
+    setIsOpen(false);
   }
-  
+
   return (
     <div className="main">
       <div className="main-page">
@@ -101,16 +95,26 @@ function Team(props: any) {
             {teams.length > 1 ? "Members" : "Member"}
           </h1>
           <h1>{team.length}</h1>
-          <button onClick = {openModal} className="member-add-btn" >Add member</button>
+          <button onClick={openModal} className="member-add-btn">
+            Add member
+          </button>
         </div>
         <div className="members-container">{team}</div>
       </div>
       <div className="second-main-page">
-        {memberDetails.firstname ? <PersonalData member={memberDetails} /> : <p>Click on a member to see details</p>}
+        {memberDetails.firstname ? (
+          <PersonalData member={memberDetails} />
+        ) : (
+          <p>Click on a member to see details</p>
+        )}
       </div>
 
       {isOpen && (
-        <TeamMemberModalComp closeModal={handleCloseModal} collaborators = {props.collaborators} team = {props.team} />
+        <TeamMemberModalComp
+          closeModal={handleCloseModal}
+          collaborators={props.collaborators}
+          team={props.team}
+        />
       )}
     </div>
   );
